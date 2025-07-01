@@ -22,6 +22,7 @@ exp*
 
 # data
 ckpts*
+dataset*
 
 # lsf
 *.bsub
@@ -31,6 +32,7 @@ scripts_dev/*
 
 *.mp4
 *.gif
+*.png
 
 # logs
 logs*
