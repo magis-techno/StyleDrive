@@ -1,0 +1,4 @@
+defaults:
+  - scene_filter: styletest
+
+data_split: test
