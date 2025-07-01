@@ -5,9 +5,10 @@
 
 <sup>1</sup> AIR, Tsinghua University, <sup>2</sup> The University of Manchester, <br> <sup>3</sup> The University of Hong Kong
 
-[![StyleDrive](https://img.shields.io/badge/Arxiv-Paper-2b9348.svg?logo=arXiv)](https://arxiv.org/abs/2506.23982)&nbsp;
-[![Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-Download-yellow)](https://huggingface.co/datasets/Ryhn98/StyleDrive-Dataset)&nbsp;
-[![Weights](https://img.shields.io/badge/%F0%9F%A4%97%20Weights-Download-blue)](https://huggingface.co/datasets/Ryhn98/StyleDrive-Dataset)&nbsp;
+[![StyleDrive](https://img.shields.io/badge/Arxiv-Paper-red)](https://arxiv.org/abs/2506.23982)&nbsp;
+[![Dataset](https://img.shields.io/badge/Dataset-Download-yellow)](https://huggingface.co/datasets/Ryhn98/StyleDrive-Dataset)&nbsp;
+[![Weights](https://img.shields.io/badge/Weights-Download-blue)](https://huggingface.co/datasets/Ryhn98/StyleDrive-Dataset)&nbsp;
+[![Homepage](https://img.shields.io/badge/Project-Website-cyan)](https://styledrive.github.io/)&nbsp;
 
 </div>
 
@@ -19,8 +20,10 @@
 ## Table of Contents
 
 - [Introduction](#introduction)
-- [Qualitative Results on StyleDrive Benchmark](#qualitative-results-on-styledrive-benchmark)
+- [StyleDrive Dataset Construction](#styledrive-dataset-construction)
 - [Getting Started](#getting-started)
+- [Benchmark Results](#benchmark-results)
+- [Qualitative Results on StyleDrive Benchmark](#qualitative-results-on-styledrive-benchmark)
 - [Contact](#contact)
 - [Acknowledgement](#acknowledgement)
 - [Citation](#citation)
@@ -31,9 +34,41 @@ We introduce the first large-scale real-world dataset with rich annotations of d
 
 <div align="center"><b>Overview and Motivation of StyleDrive.</b>
 <img src="assets/paper_overview.png" />
-<b>Pipeline of StyleDrive Dataset Construction.</b>
+To bridge the gap between personalized autonomous driving and end-to-end autonomous driving, we introduce the first benchmark tailored for personalized E2EAD.
+</div>
+<br>
+
+## StyleDrive Dataset Construction
+
+We propose a unified framework for modeling and labeling personalized driving preferences, as shown in the figure below.
+
+<div align="center"><b>Pipeline of StyleDrive Dataset Construction.</b>
 <img src="assets/annoframework.png" />
 </div>
+
+## Getting Started
+
+- [Environment and Dataset Setup](docs/install.md)
+- [Training and Evaluation](docs/train_eval.md)
+
+## Benchmark Results
+
+Main results are shown in the table below:
+
+| Models                                                     | NC                                                     | DAC                                                    | TTC                                                   | Comf.                                                  | EP                                                     | SM-PDMS                                                |
+| ---------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------ | ----------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------ |
+| [AD-MLP](https://github.com/autonomousvision/navsim)       | 92.63                                                  | 77.68                                                  | 83.83                                                 | 99.75                                                  | 78.01                                                  | 63.72                                                  |
+| [TransFuser](https://github.com/autonomousvision/navsim)   | 96.74                                                  | 88.43                                                  | 91.08                                                 | 99.65                                                  | 84.39                                                  | 78.12                                                  |
+| [WoTE](https://github.com/liyingyanUCAS/WoTE)              | 97.29                                                  | 92.39                                                  | 92.53                                                 | 99.13                                                  | 76.31                                                  | 79.56                                                  |
+| [DiffusionDrive](https://github.com/hustvl/DiffusionDrive) | 96.66                                                  | 91.45                                                  | 90.63                                                 | 99.73                                                  | 80.39                                                  | 79.33                                                  |
+| AD-MLP-Style                                               | 92.38                                                  | 73.23                                                  | 83.14                                                 | <span style="color:red"><strong>99.90</strong></span>  | 78.55                                                  | 60.02                                                  |
+| TransFuser-Style                                           | 97.23                                                  | 90.36                                                  | 92.61                                                 | 99.73                                                  | <span style="color:red"><strong>84.95</strong></span>  | 81.09                                                  |
+| WoTE-Style                                                 | <span style="color:blue"><strong>97.58</strong></span> | <span style="color:blue"><strong>93.44</strong></span> | <span style="color:red"><strong>93.70</strong></span> | 99.26                                                  | 77.38                                                  | <span style="color:blue"><strong>81.38</strong></span> |
+| DiffusionDrive-Style                                       | <span style="color:red"><strong>97.81</strong></span>  | <span style="color:red"><strong>93.45</strong></span>  | 92.81                                                 | <span style="color:blue"><strong>99.85</strong></span> | <span style="color:blue"><strong>84.84</strong></span> | <span style="color:red"><strong>84.10</strong></span>  |
+
+All the checkpoints are open-sourced in this [Link](https://huggingface.co/datasets/Ryhn98/StyleDrive-Dataset/).
+
+More discussions and analysis are provided in paper.
 
 ## Qualitative Results on StyleDrive Benchmark
 
@@ -45,17 +80,6 @@ lines indicate the model’s predicted trajectory under the given style conditio
 ground-truth human trajectory. Clear behavioral differences emerge with style variation, reflecting
 the model’s ability to adapt its outputs to driving preferences.</p>
 </div>
-
-## Getting Started
-
-- [Environment and Dataset Setup](docs/install.md)
-- [Training and Evaluation](docs/train_eval.md)
-
-## Benchmark Results
-
-<img src="assets/benchmark_results.png" />
-
-All the checkpoints are open-sourced in this [Link](https://huggingface.co/datasets/Ryhn98/StyleDrive-Dataset/).
 
 ## Contact
 
