@@ -23,6 +23,7 @@ exp*
 # data
 ckpts*
 dataset*
+!dataset_*
 
 # lsf
 *.bsub
