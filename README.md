@@ -49,7 +49,7 @@ We propose a unified framework for modeling and labeling personalized driving pr
 ## Getting Started
 
 - [Environment and Dataset Setup](docs/install.md)
-- [Dataset Structure Design](docs/dataset_illustration.md)
+- [Dataset Structure Design](docs/dataset_stat.md)
 - [Training and Evaluation](docs/train_eval.md)
 
 ## Benchmark Results
