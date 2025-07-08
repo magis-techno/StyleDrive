@@ -24,6 +24,7 @@ exp*
 ckpts*
 dataset*
 !dataset_*
+!dataset.py
 
 # lsf
 *.bsub
