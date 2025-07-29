@@ -2,6 +2,7 @@
 
 # StyleDrive Environment Variables
 # Source this script to set environment variables in current shell
+# Usage: source ./env_vars.sh
 
 export NAVSIM_EXP_ROOT="/mnt/sdb/StyleDrive/exp"
 export NAVSIM_DEVKIT_ROOT="/mnt/sdb/StyleDrive/navsim"

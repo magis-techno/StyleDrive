@@ -17,7 +17,7 @@ class TransfuserConfig:
 
     image_architecture: str = "resnet34"
     lidar_architecture: str = "resnet34"
-    bkb_path: str = os.path.expanduser("~/.cache/huggingface/hub/checkpoints/resnet34.a1_in1k/pytorch_model.bin")
+    bkb_path: str = os.path.join(os.environ["NAVSIM_WORKSPACE_ROOT"], "bkb", "pytorch_model.bin")
     plan_anchor_path: str = os.path.join(dataset_root, "extra_data/kmeans_navsim_traj_20.npy")
 
     with_style: bool = False

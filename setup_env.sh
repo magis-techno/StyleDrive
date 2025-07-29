@@ -2,6 +2,7 @@
 
 # StyleDrive Environment Variables Setup Script
 # This script sets up the required environment variables for StyleDrive
+# Interactive version that can optionally add variables to ~/.bashrc
 
 echo "Setting up StyleDrive environment variables..."
 

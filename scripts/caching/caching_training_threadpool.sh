@@ -1,9 +1,10 @@
 #!/bin/bash
 
-# 使用单机线程池worker，避免Ray相关问题
-# 比sequential快，比Ray稳定
+# StyleDrive Dataset Caching Script (Thread Pool Worker)
+# This script caches the training dataset using multi-threaded worker pool
+# Balance between performance and stability, avoids Ray-related issues
 
-# 确保环境变量已设置
+# Ensure environment variables are set
 if [ -z "$NAVSIM_DEVKIT_ROOT" ]; then
     echo "Error: NAVSIM_DEVKIT_ROOT is not set. Please run: source ./env_vars.sh"
     exit 1
@@ -18,10 +19,10 @@ echo "Using NAVSIM_DEVKIT_ROOT: $NAVSIM_DEVKIT_ROOT"
 echo "Using NAVSIM_EXP_ROOT: $NAVSIM_EXP_ROOT"
 echo "Using single machine thread pool worker"
 
-# 创建缓存目录
+# Create cache directory
 mkdir -p "$NAVSIM_EXP_ROOT/training_cache"
 
-# 运行缓存命令，使用thread pool worker
+# Run caching command with thread pool worker
 python $NAVSIM_DEVKIT_ROOT/planning/script/run_dataset_caching.py \
     agent=diffusiondrive_style_agent \
     experiment_name=training_diffusiondrive_style_agent \
