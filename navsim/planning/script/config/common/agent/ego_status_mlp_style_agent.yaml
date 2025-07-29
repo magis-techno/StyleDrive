@@ -10,5 +10,5 @@ checkpoint_path: null
 hidden_layer_dim: 512
 lr: 1e-4
 with_style: True
-styletrain_path: "YourStyleDrivePath/dataset/extra_data/styletrain.json"
-styletest_path: "YourStyleDrivePath/dataset/extra_data/styletest.json"
+styletrain_path: "/mnt/sdb/DiffusionDrive/dataset/extra_data/styletrain.json"
+styletest_path: "/mnt/sdb/DiffusionDrive/dataset/extra_data/styletest.json"
