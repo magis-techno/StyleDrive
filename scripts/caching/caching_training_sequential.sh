@@ -6,12 +6,12 @@
 
 # Ensure environment variables are set
 if [ -z "$NAVSIM_DEVKIT_ROOT" ]; then
-    echo "Error: NAVSIM_DEVKIT_ROOT is not set. Please run: source ./env_vars.sh"
+    echo "Error: NAVSIM_DEVKIT_ROOT is not set. Please run: source ./setup_env.sh"
     exit 1
 fi
 
 if [ -z "$NAVSIM_EXP_ROOT" ]; then
-    echo "Error: NAVSIM_EXP_ROOT is not set. Please run: source ./env_vars.sh"
+    echo "Error: NAVSIM_EXP_ROOT is not set. Please run: source ./setup_env.sh"
     exit 1
 fi
 

@@ -22,10 +22,11 @@ class TransfuserBackbone(nn.Module):
         self.config = config
 
         try:
-            self.image_encoder = timm.create_model(config.image_architecture, pretrained=True, features_only=True)
-        except Exception as e:
             self.image_encoder = timm.create_model(config.image_architecture, pretrained=True, features_only=True,
                                                    pretrained_cfg_overlay=dict(file=config.bkb_path))
+        except Exception as e:
+            print(f"Failed to load image encoder with error: {e}")
+
         if config.use_ground_plane:
             in_channels = 2 * config.lidar_seq_len
         else:
