@@ -175,41 +175,54 @@ verify_ray() {
     fi
 }
 
-# 7. 创建低资源Ray配置
+# 7. 创建Ray配置
 create_low_resource_config() {
-    log_info "创建低资源Ray配置..."
+    log_info "创建Ray配置文件..."
     
     local config_dir="navsim/planning/script/config/common/worker"
-    local config_file="$config_dir/ray_fixed.yaml"
     
     if [ ! -d "$config_dir" ]; then
         log_error "配置目录不存在: $config_dir"
         return 1
     fi
     
-    cat > "$config_file" << 'EOF'
+    # 创建连接现有集群的配置
+    cat > "$config_dir/ray_existing_cluster.yaml" << 'EOF'
+_target_: navsim.planning.utils.multithreading.worker_ray_no_torch.RayDistributedNoTorch
+_convert_: 'all'
+master_node_ip: null      # 连接本地Ray集群
+threads_per_node: null    # 不指定CPU数量，使用现有集群资源
+debug_mode: false
+log_to_driver: true
+logs_subdir: 'logs'
+use_distributed: false    # 使用本地Ray集群
+EOF
+    
+    # 创建低资源新集群配置（备用）
+    cat > "$config_dir/ray_low_resource_new.yaml" << 'EOF'
 _target_: navsim.planning.utils.multithreading.worker_ray_no_torch.RayDistributedNoTorch
 _convert_: 'all'
 master_node_ip: null
-threads_per_node: 2      # 降低线程数减少资源消耗
+threads_per_node: 2       # 降低线程数减少资源消耗
 debug_mode: false
 log_to_driver: true
 logs_subdir: 'logs'
 use_distributed: false
 EOF
     
-    log_success "创建低资源配置: $config_file"
+    log_success "创建Ray配置文件"
 }
 
 # 8. 创建Ray缓存脚本
 create_ray_caching_script() {
     log_info "创建Ray缓存脚本..."
     
-    cat > "scripts/caching/caching_training_ray_fixed.sh" << 'EOF'
+    # 创建连接现有集群的脚本
+    cat > "scripts/caching/caching_training_ray_existing.sh" << 'EOF'
 #!/bin/bash
 
-# StyleDrive Dataset Caching Script (Fixed Ray Worker)
-# This script uses a resource-optimized Ray configuration
+# StyleDrive Dataset Caching Script (Ray Existing Cluster)
+# This script connects to an already running Ray cluster
 
 # Ensure environment variables are set
 if [ -z "$NAVSIM_DEVKIT_ROOT" ]; then
@@ -224,22 +237,32 @@ fi
 
 echo "Using NAVSIM_DEVKIT_ROOT: $NAVSIM_DEVKIT_ROOT"
 echo "Using NAVSIM_EXP_ROOT: $NAVSIM_EXP_ROOT"
-echo "Using fixed Ray worker (low resource)"
+echo "Using existing Ray cluster"
+
+# Check if Ray is running
+if ! ray status >/dev/null 2>&1; then
+    echo "Error: Ray cluster is not running. Please start Ray first:"
+    echo "  ray start --head --disable-usage-stats"
+    exit 1
+fi
+
+echo "Ray cluster is running:"
+ray status
 
 # Create cache directory
 mkdir -p "$NAVSIM_EXP_ROOT/training_cache"
 
-# Run caching command with fixed Ray worker
+# Run caching command with existing Ray cluster
 python $NAVSIM_DEVKIT_ROOT/planning/script/run_dataset_caching.py \
     agent=diffusiondrive_style_agent \
     experiment_name=training_diffusiondrive_style_agent \
     train_test_split=styletrain \
     cache_path=$NAVSIM_EXP_ROOT/training_cache \
-    worker=ray_fixed
+    worker=ray_existing_cluster
 EOF
 
-    chmod +x "scripts/caching/caching_training_ray_fixed.sh"
-    log_success "创建Ray缓存脚本: scripts/caching/caching_training_ray_fixed.sh"
+    chmod +x "scripts/caching/caching_training_ray_existing.sh"
+    log_success "创建Ray缓存脚本: scripts/caching/caching_training_ray_existing.sh"
 }
 
 # 主函数
@@ -282,9 +305,10 @@ main() {
     
     echo ""
     echo "🔧 修复完成！使用建议："
-    echo "1. 如果Ray正常: ./scripts/caching/caching_training_ray_fixed.sh"
-    echo "2. 如果仍有问题: ./scripts/caching/caching_training_threadpool.sh"
-    echo "3. 调试模式: ray status"
+    echo "1. Ray已启动，使用现有集群: ./scripts/caching/caching_training_ray_existing.sh"
+    echo "2. 如果仍有问题，使用ThreadPool: ./scripts/caching/caching_training_threadpool.sh"
+    echo "3. 检查Ray状态: ray status"
+    echo "4. 停止Ray: ray stop"
 }
 
 # 运行主函数
