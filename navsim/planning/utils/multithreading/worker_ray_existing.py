@@ -37,11 +37,16 @@ class RayExistingCluster(WorkerPool):
         :param logs_subdir: Subdirectory for logs
         :param use_distributed: Not used, kept for compatibility
         """
-        super().__init__()
-        
         self._debug_mode = debug_mode
         self._log_to_driver = log_to_driver
         
+        super().__init__(self.initialize())
+
+    def initialize(self) -> WorkerResources:
+        """
+        Initialize connection to existing Ray cluster and return worker resources.
+        :return: WorkerResources describing the cluster.
+        """
         # Check if Ray is already initialized
         if not ray.is_initialized():
             logger.error("Ray is not initialized! Please start Ray first with: ray start --head")
@@ -51,21 +56,16 @@ class RayExistingCluster(WorkerPool):
         
         # Get cluster resources
         cluster_resources = ray.cluster_resources()
-        self._number_of_cpus = int(cluster_resources.get('CPU', cpu_count()))
-        self._number_of_gpus = int(cluster_resources.get('GPU', 0))
+        number_of_cpus = int(cluster_resources.get('CPU', cpu_count()))
+        number_of_gpus = int(cluster_resources.get('GPU', 0))
         
-        logger.info(f"Ray cluster resources - CPU: {self._number_of_cpus}, GPU: {self._number_of_gpus}")
+        logger.info(f"Ray cluster resources - CPU: {number_of_cpus}, GPU: {number_of_gpus}")
         
-        self._worker_resources = WorkerResources(
-            number_of_nodes=1,  # Simplified assumption
-            number_of_cpus_per_node=self._number_of_cpus,
-            number_of_gpus_per_node=self._number_of_gpus,
+        return WorkerResources(
+            number_of_nodes=1,  # Simplified assumption for existing cluster
+            number_of_cpus_per_node=number_of_cpus,
+            number_of_gpus_per_node=number_of_gpus,
         )
-
-    @property
-    def worker_resources(self) -> WorkerResources:
-        """Inherited, see superclass."""
-        return self._worker_resources
 
     def _map(self, task: Task, *item_lists: Iterable[List[Any]], verbose: bool = False) -> List[Any]:
         """Inherited, see superclass."""
