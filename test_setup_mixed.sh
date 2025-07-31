@@ -9,12 +9,6 @@ echo "=================================================="
 echo ""
 
 # 1. Set environment variables
-echo "1. Setting environment variables..."
-export NUPLAN_MAP_VERSION="nuplan-maps-v1.0"
-export NUPLAN_MAPS_ROOT="$HOME/DiffusionDrive/dataset/maps"
-export OPENSCENE_DATA_ROOT="$HOME/DiffusionDrive/dataset"
-export NAVSIM_EXP_ROOT="$HOME/StyleDrive/exp"
-export NAVSIM_DEVKIT_ROOT="$HOME/StyleDrive/navsim"
 
 echo "   Data paths (DiffusionDrive):"
 echo "     NUPLAN_MAPS_ROOT: $NUPLAN_MAPS_ROOT"
@@ -28,7 +22,7 @@ echo ""
 echo "2. Checking directory structure..."
 
 # Check DiffusionDrive data directories
-DIFFUSION_DATASET="$HOME/DiffusionDrive/dataset"
+DIFFUSION_DATASET="/mnt/sdb/DiffusionDrive/dataset"
 if [ -d "$DIFFUSION_DATASET" ]; then
     echo "   ✓ DiffusionDrive dataset exists: $DIFFUSION_DATASET"
 else

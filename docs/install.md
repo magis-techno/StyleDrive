@@ -58,10 +58,10 @@ Based on the structure above, the environment variables need to be defined as:
 
 ```bash
 export NUPLAN_MAP_VERSION="nuplan-maps-v1.0"
-export NUPLAN_MAPS_ROOT="$HOME/StyleDrive/dataset/maps"
-export NAVSIM_EXP_ROOT="$HOME/StyleDrive/exp"
-export NAVSIM_DEVKIT_ROOT="$HOME/StyleDrive/navsim"
-export OPENSCENE_DATA_ROOT="$HOME/StyleDrive/dataset"
+export NUPLAN_MAPS_ROOT="/mnt/sdb/DiffusionDrive/dataset/maps"
+export NAVSIM_EXP_ROOT="/mnt/sdb/StyleDrive/exp"
+export NAVSIM_DEVKIT_ROOT="/mnt/sdb/StyleDrive/navsim"
+export OPENSCENE_DATA_ROOT="/mnt/sdb/DiffusionDrive/dataset"
 ```
 
 ### 3. Install the navsim-devkit and specific packages for baseline models

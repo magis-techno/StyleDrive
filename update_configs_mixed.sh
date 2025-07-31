@@ -7,8 +7,8 @@ echo "Updating StyleDrive configuration files for mixed configuration..."
 echo ""
 
 # Set the correct paths for mixed configuration
-DIFFUSION_DATASET="$HOME/DiffusionDrive/dataset"
-NAVSIM_DEVKIT_ROOT="$HOME/StyleDrive/navsim"
+DIFFUSION_DATASET="/mnt/sdb/DiffusionDrive/dataset"
+NAVSIM_DEVKIT_ROOT="/mnt/sdb/StyleDrive/navsim"
 
 echo "Configuration:"
 echo "  Data source: $DIFFUSION_DATASET"

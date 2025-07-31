@@ -10,10 +10,10 @@ echo ""
 
 # Set environment variables for mixed configuration
 export NUPLAN_MAP_VERSION="nuplan-maps-v1.0"
-export NUPLAN_MAPS_ROOT="$HOME/DiffusionDrive/dataset/maps"
-export OPENSCENE_DATA_ROOT="$HOME/DiffusionDrive/dataset"
-export NAVSIM_EXP_ROOT="$HOME/StyleDrive/exp"
-export NAVSIM_DEVKIT_ROOT="$HOME/StyleDrive/navsim"
+export NUPLAN_MAPS_ROOT="/mnt/sdb/DiffusionDrive/dataset/maps"
+export OPENSCENE_DATA_ROOT="/mnt/sdb/DiffusionDrive/dataset"
+export NAVSIM_EXP_ROOT="/mnt/sdb/StyleDrive/exp"
+export NAVSIM_DEVKIT_ROOT="/mnt/sdb/StyleDrive/navsim"
 
 # Verify environment variables
 if [ -z "$NAVSIM_DEVKIT_ROOT" ] || [ -z "$NAVSIM_EXP_ROOT" ] || [ -z "$OPENSCENE_DATA_ROOT" ]; then
@@ -66,7 +66,7 @@ if [ ! -f "$NAVSIM_DEVKIT_ROOT/planning/script/run_dataset_caching.py" ]; then
 fi
 
 # Change to StyleDrive directory
-cd "$HOME/StyleDrive"
+cd "/mnt/sdb/StyleDrive"
 
 # Run caching with sequential worker (most stable)
 echo "Starting dataset caching (this may take a while)..."
