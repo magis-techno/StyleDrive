@@ -7,7 +7,7 @@ COUNTRY="MUST_SET"
 SUBMISSION_PICKLES="['/path/to/submission.pkl','/path/to/submission.pkl','/path/to/submission.pkl']"
 TRAIN_TEST_SPLIT=navtest
 
-python $NAVSIM_DEVKIT_ROOT/navsim/planning/script/run_merge_submission_pickles.py \
+python $NAVSIM_DEVKIT_ROOT/planning/script/run_merge_submission_pickles.py \
 train_test_split=$TRAIN_TEST_SPLIT \
 experiment_name=submission_merged_agent \
 submission_pickles=$SUBMISSION_PICKLES \
