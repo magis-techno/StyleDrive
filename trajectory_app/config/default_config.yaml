@@ -1,0 +1,67 @@
+# Trajectory Prediction Application Configuration
+
+# Model configuration
+model:
+  type: "diffusiondrive"  # Options: "diffusiondrive", "transfuser"
+  checkpoint_path: null   # Path to model checkpoint (.pth file)
+  lr: 6e-4               # Learning rate (used during agent initialization)
+
+# Data configuration
+data:
+  navsim_log_path: "${OPENSCENE_DATA_ROOT}/navsim_logs/test"      # Path to NavSim log data
+  sensor_blobs_path: "${OPENSCENE_DATA_ROOT}/sensor_blobs/test"   # Path to sensor blob data
+  cache_path: "${NAVSIM_EXP_ROOT}/metric_cache"                  # Path to metric cache
+
+# Visualization configuration
+visualization:
+  # Default time windows for different visualization modes
+  time_windows: [1.0, 3.0, 6.0]
+  
+  # Output formats
+  save_formats: ["png", "pdf"]
+  
+  # Figure settings
+  figure_sizes:
+    comprehensive: [20, 12]
+    simple_bev: [10, 8]
+    
+  # Custom trajectory styles (optional override)
+  trajectory_styles:
+    prediction:
+      color: "#DC143C"      # Red
+      style: "-"
+      width: 3
+      alpha: 0.8
+      label: "Model Prediction"
+    ground_truth:
+      color: "#2E8B57"      # Sea green
+      style: "-" 
+      width: 3
+      alpha: 0.9
+      label: "Ground Truth"
+    pdm_closed:
+      color: "#4169E1"      # Royal blue
+      style: "--"
+      width: 2
+      alpha: 0.7
+      label: "PDM-Closed"
+
+# Output configuration
+output:
+  output_dir: "./output"           # Default output directory
+  save_individual: true            # Save individual scene results
+  save_comparison: true            # Save comparison plots
+  
+# Logging configuration  
+logging:
+  level: "INFO"                    # Log level: DEBUG, INFO, WARNING, ERROR
+
+# Application settings
+app:
+  max_batch_size: 100              # Maximum scenes to process in batch
+  default_time_window: [0, 3.0]    # Default time window [start, end] in seconds
+  
+# Environment variables (will be expanded automatically)
+# Make sure to set these before running the application:
+# export OPENSCENE_DATA_ROOT="/path/to/your/data"
+# export NAVSIM_EXP_ROOT="/path/to/your/experiments" 

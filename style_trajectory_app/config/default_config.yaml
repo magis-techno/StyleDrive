@@ -1,0 +1,45 @@
+# StyleTrajectoryApp Default Configuration
+# Simplified configuration for style-aware trajectory prediction
+
+# Model configuration
+model:
+  type: "diffusiondrive_style"
+  checkpoint_path: null  # Set this to your actual checkpoint path
+  lr: 6e-4
+  with_style: true
+
+# Data configuration  
+data:
+  dataset_path: null  # Set this to your NavSim dataset path
+  
+# Visualization configuration
+visualization:
+  figsize: [12, 8]
+  save_dpi: 300
+  style_colors:
+    aggressive: "red"
+    normal: "blue" 
+    conservative: "green"
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Style configuration
+styles:
+  aggressive:
+    code: "A"
+    index: 0
+    color: "red"
+    description: "Aggressive driving style"
+  normal:
+    code: "N" 
+    index: 1
+    color: "blue"
+    description: "Normal driving style"
+  conservative:
+    code: "C"
+    index: 2
+    color: "green"
+    description: "Conservative driving style"
