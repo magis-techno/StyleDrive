@@ -4,5 +4,6 @@ master_node_ip: null          # 不需要，自动检测现有集群
 threads_per_node: null        # 不需要，使用现有集群资源
 debug_mode: false             # 如果为true则串行执行用于调试
 log_to_driver: true           # 显示worker日志
+output_dir: null              # 输出目录，可选
 logs_subdir: 'logs'           # 日志子目录
 use_distributed: false        # 不需要，连接现有集群
