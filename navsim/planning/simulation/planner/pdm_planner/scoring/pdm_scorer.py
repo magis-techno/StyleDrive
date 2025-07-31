@@ -118,7 +118,7 @@ class PDMScorer:
         centerline: PDMPath,
         route_lane_ids: List[str],
         drivable_area_map: PDMDrivableMap,
-        style: str
+        style: str = "N"
     ) -> npt.NDArray[np.float64]:
         """
         Scores proposal similar to nuPlan's closed-loop metrics
