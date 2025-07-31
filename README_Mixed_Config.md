@@ -81,7 +81,7 @@ The scripts will update these configuration files in StyleDrive:
 **Update example:**
 ```yaml
 # Before
-styletrain_path: "YourStyleDrivePath/dataset/extra_data/styletrain.json"
+styletrain_path: "/mnt/sdb/DiffusionDrive/dataset/extra_data/styletrain.json"
 
 # After  
 styletrain_path: "/home/user/DiffusionDrive/dataset/extra_data/styletrain.json"
