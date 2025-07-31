@@ -175,27 +175,155 @@ verify_ray() {
     fi
 }
 
-# 7. 创建Ray配置
+# 7. 创建Ray worker和配置
 create_low_resource_config() {
-    log_info "创建Ray配置文件..."
+    log_info "创建Ray worker和配置文件..."
     
     local config_dir="navsim/planning/script/config/common/worker"
+    local worker_dir="navsim/planning/utils/multithreading"
     
     if [ ! -d "$config_dir" ]; then
         log_error "配置目录不存在: $config_dir"
         return 1
     fi
     
+    if [ ! -d "$worker_dir" ]; then
+        log_error "Worker目录不存在: $worker_dir"
+        return 1
+    fi
+    
+    # 创建新的Ray worker类
+    cat > "$worker_dir/worker_ray_existing.py" << 'EOF'
+"""
+Ray worker that connects to existing Ray cluster without reinitializing.
+"""
+import logging
+from concurrent.futures import Future
+from typing import Any, Iterable, List, Optional, Union
+
+import ray
+from psutil import cpu_count
+
+from nuplan.planning.utils.multithreading.ray_execution import ray_map
+from nuplan.planning.utils.multithreading.worker_pool import Task, WorkerPool, WorkerResources
+
+logger = logging.getLogger(__name__)
+
+class RayExistingCluster(WorkerPool):
+    """
+    Ray worker that connects to an existing Ray cluster without reinitializing.
+    """
+
+    def __init__(
+        self,
+        master_node_ip: Optional[str] = None,
+        threads_per_node: Optional[int] = None,
+        debug_mode: bool = False,
+        log_to_driver: bool = True,
+        logs_subdir: str = "logs",
+        use_distributed: bool = False,
+    ):
+        """
+        Initialize Ray worker for existing cluster.
+        
+        :param master_node_ip: Not used, kept for compatibility
+        :param threads_per_node: Not used, kept for compatibility  
+        :param debug_mode: If true, execute serially for debugging
+        :param log_to_driver: If true, show logs from workers
+        :param logs_subdir: Subdirectory for logs
+        :param use_distributed: Not used, kept for compatibility
+        """
+        super().__init__()
+        
+        self._debug_mode = debug_mode
+        self._log_to_driver = log_to_driver
+        
+        # Check if Ray is already initialized
+        if not ray.is_initialized():
+            logger.error("Ray is not initialized! Please start Ray first with: ray start --head")
+            raise RuntimeError("Ray cluster not found. Please start Ray first.")
+        
+        logger.info("Connected to existing Ray cluster")
+        
+        # Get cluster resources
+        cluster_resources = ray.cluster_resources()
+        self._number_of_cpus = int(cluster_resources.get('CPU', cpu_count()))
+        self._number_of_gpus = int(cluster_resources.get('GPU', 0))
+        
+        logger.info(f"Ray cluster resources - CPU: {self._number_of_cpus}, GPU: {self._number_of_gpus}")
+        
+        self._worker_resources = WorkerResources(
+            number_of_nodes=1,  # Simplified assumption
+            number_of_cpus_per_node=self._number_of_cpus,
+            number_of_gpus_per_node=self._number_of_gpus,
+        )
+
+    @property
+    def worker_resources(self) -> WorkerResources:
+        """Inherited, see superclass."""
+        return self._worker_resources
+
+    def map(self, func: Any, argument_list: List[Any]) -> List[Any]:
+        """Inherited, see superclass."""
+        if self._debug_mode:
+            logger.info("Running in debug mode (serial execution)")
+            return [func(arg) for arg in argument_list]
+        else:
+            logger.info(f"Executing {len(argument_list)} tasks on Ray cluster")
+            return ray_map(func, argument_list)
+
+    def submit(self, task: Task, *args: Any, **kwargs: Any) -> Future:
+        """Inherited, see superclass."""
+        if self._debug_mode:
+            # Execute synchronously for debugging
+            future = Future()
+            try:
+                result = task(*args, **kwargs)
+                future.set_result(result)
+            except Exception as e:
+                future.set_exception(e)
+            return future
+        else:
+            # Submit to Ray
+            ray_future = ray.remote(task).remote(*args, **kwargs)
+            # Convert Ray future to standard Future
+            future = Future()
+            
+            def _get_result():
+                try:
+                    result = ray.get(ray_future)
+                    future.set_result(result)
+                except Exception as e:
+                    future.set_exception(e)
+            
+            # Start background thread to get result
+            import threading
+            threading.Thread(target=_get_result, daemon=True).start()
+            return future
+
+    def __enter__(self):
+        """Inherited, see superclass."""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Inherited, see superclass."""
+        # Don't shutdown Ray as it's an existing cluster
+        logger.info("Disconnecting from Ray cluster (cluster remains running)")
+        pass
+EOF
+    
+    log_success "创建Ray worker类: $worker_dir/worker_ray_existing.py"
+    
     # 创建连接现有集群的配置
     cat > "$config_dir/ray_existing_cluster.yaml" << 'EOF'
-_target_: navsim.planning.utils.multithreading.worker_ray_no_torch.RayDistributedNoTorch
+_target_: navsim.planning.utils.multithreading.worker_ray_existing.RayExistingCluster
 _convert_: 'all'
-master_node_ip: null      # 连接本地Ray集群
-threads_per_node: null    # 不指定CPU数量，使用现有集群资源
-debug_mode: false
-log_to_driver: true
-logs_subdir: 'logs'
-use_distributed: false    # 使用本地Ray集群
+master_node_ip: null          # 不需要，自动检测现有集群
+threads_per_node: null        # 不需要，使用现有集群资源
+debug_mode: false             # 如果为true则串行执行用于调试
+log_to_driver: true           # 显示worker日志
+logs_subdir: 'logs'           # 日志子目录
+use_distributed: false        # 不需要，连接现有集群
 EOF
     
     # 创建低资源新集群配置（备用）

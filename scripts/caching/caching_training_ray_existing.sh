@@ -34,7 +34,7 @@ mkdir -p "$NAVSIM_EXP_ROOT/training_cache"
 # Run caching command with existing Ray cluster
 python $NAVSIM_DEVKIT_ROOT/planning/script/run_dataset_caching.py \
     agent=diffusiondrive_style_agent \
-    experiment_name=training_diffusiondrive_style_agent \
+    experiment_name=training_diffusiondrive_style_agent——ray \
     train_test_split=styletrain \
     cache_path=$NAVSIM_EXP_ROOT/training_cache \
     worker=ray_existing_cluster

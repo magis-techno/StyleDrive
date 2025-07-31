@@ -1,8 +1,8 @@
-_target_: navsim.planning.utils.multithreading.worker_ray_no_torch.RayDistributedNoTorch
+_target_: navsim.planning.utils.multithreading.worker_ray_existing.RayExistingCluster
 _convert_: 'all'
-master_node_ip: null      # 连接本地Ray集群
-threads_per_node: null    # 不指定CPU数量，使用现有集群资源
-debug_mode: false
-log_to_driver: true
-logs_subdir: 'logs'
-use_distributed: false    # 使用本地Ray集群
+master_node_ip: null          # 不需要，自动检测现有集群
+threads_per_node: null        # 不需要，使用现有集群资源
+debug_mode: false             # 如果为true则串行执行用于调试
+log_to_driver: true           # 显示worker日志
+logs_subdir: 'logs'           # 日志子目录
+use_distributed: false        # 不需要，连接现有集群
