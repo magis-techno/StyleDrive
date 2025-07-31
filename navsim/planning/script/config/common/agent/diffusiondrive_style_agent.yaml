@@ -13,8 +13,8 @@ config:
 
   latent: False
   with_style: True
-  styletrain_path: "/mnt/sdb/DiffusionDrive/dataset/extra_data/styletrain.json"
-  styletest_path: "/mnt/sdb/DiffusionDrive/dataset/extra_data/styletest.json"
+  styletrain_path: "YourStyleDrivePath/dataset/extra_data/styletrain.json"
+  styletest_path: "YourStyleDrivePath/dataset/extra_data/styletest.json"
 
 checkpoint_path: null
 lr: 6e-4
