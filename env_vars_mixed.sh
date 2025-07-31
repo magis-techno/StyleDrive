@@ -6,12 +6,12 @@
 
 # Data-related paths (reuse DiffusionDrive)
 export NUPLAN_MAP_VERSION="nuplan-maps-v1.0"
-export NUPLAN_MAPS_ROOT="$HOME/DiffusionDrive/dataset/maps"
-export OPENSCENE_DATA_ROOT="$HOME/DiffusionDrive/dataset"
+export NUPLAN_MAPS_ROOT="/mnt/sdb/DiffusionDrive/dataset/maps"
+export OPENSCENE_DATA_ROOT="/mnt/sdb/DiffusionDrive/dataset"
 
 # StyleDrive project paths
-export NAVSIM_EXP_ROOT="$HOME/StyleDrive/exp"
-export NAVSIM_DEVKIT_ROOT="$HOME/StyleDrive/navsim"
+export NAVSIM_EXP_ROOT="/mnt/sdb/StyleDrive/exp"
+export NAVSIM_DEVKIT_ROOT="/mnt/sdb/StyleDrive/navsim"
 
 echo "Mixed configuration environment variables set:"
 echo "  Data paths (DiffusionDrive):"
