@@ -45,7 +45,7 @@ def parse_arguments():
     )
     
     parser.add_argument(
-        '--split', '-s',
+        '--split', '-sp',
         type=str, 
         default='navtest',
         help='数据集split名称 (默认: navtest, 可选: navmini, styletrain等)'
