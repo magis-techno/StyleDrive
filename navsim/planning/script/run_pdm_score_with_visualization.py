@@ -20,28 +20,33 @@ from nuplan.planning.utils.multithreading.worker_ray import RayDistributed
 from navsim.common.dataclasses import PDMResults, Trajectory
 from navsim.evaluate.pdm_score import pdm_score
 from navsim.planning.metric_caching.metric_cache import MetricCache
-from navsim.common.dataloader import MetricCacheLoader
-from navsim.planning.scenario_builder.navsim_scenario import NavSimScenario
-from navsim.planning.script.builders.observation_builder import build_observation_wrapper
-from navsim.planning.script.builders.planner_builder import build_planner
-from navsim.planning.script.builders.simulation_builder import build_simulation_map_manager
+from navsim.common.dataloader import MetricCacheLoader, SceneLoader, SceneFilter
+
+from hydra.utils import instantiate
+from navsim.planning.simulation.planner.pdm_planner.simulation.pdm_simulator import PDMSimulator
+from navsim.planning.simulation.planner.pdm_planner.scoring.pdm_scorer import PDMScorer
+
+from navsim.common.dataclasses import SensorConfig
 from navsim.planning.script.builders.worker_pool_builder import build_worker
 from navsim.planning.script.utils import run_runners
 from navsim.visualization.evaluation_viz import create_evaluation_visualization, save_evaluation_results
 
 import logging
+import json
+import os
+
 logger = logging.getLogger(__name__)
 
 # Configuration paths
 CONFIG_PATH = "config/pdm_scoring"
 CONFIG_NAME = "default_run_pdm_score"
 
-# Import style test labels (assuming they exist)
-try:
-    from navsim.planning.script.run_pdm_score import STYLETEST_LABEL
-except ImportError:
-    logger.warning("STYLETEST_LABEL not found, using default style mapping")
-    STYLETEST_LABEL = {}
+# Load style test labels
+dataset_root = os.environ.get('OPENSCENE_DATA_ROOT')
+styletest_json_path = os.path.join(dataset_root, "extra_data/styletest.json")
+with open(styletest_json_path, 'r', encoding='utf-8') as f:
+    style_dict = json.load(f)
+STYLETEST_LABEL = {key: value["ANC_result"] for key, value in style_dict.items()}
 
 
 def run_pdm_score_with_visualization(
@@ -193,16 +198,26 @@ def main(cfg: DictConfig) -> None:
     
     # Build components
     logger.info("Building PDM Scorer...")
-    simulator, scorer = build_observation_wrapper(cfg.observationi_wrapper)
+    simulator: PDMSimulator = instantiate(cfg.simulator)
+    scorer: PDMScorer = instantiate(cfg.scorer)
+    assert (
+        simulator.proposal_sampling == scorer.proposal_sampling
+    ), "Simulator and scorer proposal sampling has to be identical"
     
     logger.info("Building SceneLoader")
-    scenario_builder = build_simulation_map_manager(cfg.simulation_map_manager, cfg.train_test_split)
+    scene_loader = SceneLoader(
+        sensor_blobs_path=None,
+        data_path=Path(cfg.navsim_log_path),
+        scene_filter=instantiate(cfg.train_test_split.scene_filter),
+        sensor_config=SensorConfig.build_no_sensors(),
+    )
     
     logger.info("Building MetricCacheLoader")
     metric_cache_loader = MetricCacheLoader(Path(cfg.metric_cache_path))
     
     logger.info("Building Agent")
-    planner = build_planner(cfg.agent)
+    planner = instantiate(cfg.agent)
+    planner.initialize()
     
     # Setup visualization output directory
     output_viz_dir = None
@@ -212,7 +227,7 @@ def main(cfg: DictConfig) -> None:
         logger.info(f"Visualization output directory: {output_viz_dir}")
     
     # Get tokens to evaluate
-    tokens_to_evaluate = list(set(scenario_builder.get_tokens()) & set(metric_cache_loader.tokens))
+    tokens_to_evaluate = list(set(scene_loader.tokens) & set(metric_cache_loader.tokens))
     logger.info(f"Evaluating {len(tokens_to_evaluate)} scenarios")
     
     # Limit visualizations if specified
@@ -230,7 +245,7 @@ def main(cfg: DictConfig) -> None:
             metric_cache_loader,
             simulator,
             scorer,
-            scenario_builder,
+            scene_loader,
         ]
     ]
     
