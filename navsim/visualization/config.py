@@ -255,4 +255,89 @@ TRAJECTORY_CONFIG: Dict[str, Any] = {
         "marker_edge_color": "black",
         "zorder": 3,
     },
+    "predicted": {
+        "fill_color": ELLIS_5[0],  # red
+        "fill_color_alpha": 1.0,
+        "line_color": ELLIS_5[0],
+        "line_color_alpha": 1.0,
+        "line_width": 2.5,
+        "line_style": "-",
+        "marker": "s",
+        "marker_size": 4,
+        "marker_edge_color": "black",
+        "zorder": 4,
+    },
+    "ground_truth": {
+        "fill_color": NEW_TAB_10[4],  # green
+        "fill_color_alpha": 1.0,
+        "line_color": NEW_TAB_10[4],
+        "line_color_alpha": 1.0,
+        "line_width": 2.5,
+        "line_style": "-",
+        "marker": "o",
+        "marker_size": 4,
+        "marker_edge_color": "black",
+        "zorder": 4,
+    },
+    "pdm_reference": {
+        "fill_color": NEW_TAB_10[0],  # blue
+        "fill_color_alpha": 1.0,
+        "line_color": NEW_TAB_10[0],
+        "line_color_alpha": 1.0,
+        "line_width": 2.0,
+        "line_style": "--",
+        "marker": "^",
+        "marker_size": 4,
+        "marker_edge_color": "black",
+        "zorder": 3,
+    },
+}
+
+
+# PDM Evaluation Results Display Configuration
+PDM_RESULTS_CONFIG: Dict[str, Any] = {
+    "text_box": {
+        "position": "top-right",  # top-right, top-left, bottom-right, bottom-left
+        "bbox": {
+            "boxstyle": "round,pad=0.3",
+            "facecolor": "white",
+            "alpha": 0.9,
+            "edgecolor": "black",
+            "linewidth": 1.0,
+        },
+        "font_size": 9,
+        "font_family": "monospace",
+        "text_color": "black",
+        "zorder": 10,
+    },
+    "metrics_display": {
+        "show_overall_score": True,
+        "show_style": True,
+        "show_detailed_metrics": True,
+        "decimal_places": 3,
+    },
+    "style_colors": {
+        "aggressive": ELLIS_5[0],  # red
+        "normal": NEW_TAB_10[4],   # green
+        "conservative": NEW_TAB_10[0],  # blue
+        "N": NEW_TAB_10[7],  # default gray
+    },
+}
+
+
+# Multiple trajectory comparison configuration
+TRAJECTORY_COMPARISON_CONFIG: Dict[str, Any] = {
+    "legend": {
+        "show": True,
+        "location": "upper left",
+        "font_size": 9,
+        "frame_alpha": 0.8,
+        "fancybox": True,
+        "shadow": True,
+    },
+    "title": {
+        "show": True,
+        "font_size": 12,
+        "font_weight": "bold",
+    },
 }

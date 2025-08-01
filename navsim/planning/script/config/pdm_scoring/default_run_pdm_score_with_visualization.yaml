@@ -1,0 +1,18 @@
+# @package _global_
+
+defaults:
+  - default_run_pdm_score
+  - _self_
+
+# Enable visualization output
+enable_visualization: true
+
+# Visualization specific settings
+visualization_output_dir: "pdm_evaluation_visualizations"
+max_visualizations: 50
+
+# Override experiment name to include visualization
+experiment_name: "eval_with_visualization"
+
+# Force single-threaded execution for visualization compatibility
+worker: sequential
