@@ -10,6 +10,7 @@ import matplotlib.patches as patches
 from dataclasses import asdict
 
 from navsim.common.dataclasses import PDMResults, Trajectory, Frame
+from nuplan.planning.simulation.trajectory.trajectory_sampling import TrajectorySampling
 from navsim.visualization.config import (
     PDM_RESULTS_CONFIG, 
     TRAJECTORY_CONFIG, 
@@ -17,6 +18,67 @@ from navsim.visualization.config import (
     BEV_PLOT_CONFIG
 )
 from navsim.visualization.bev import add_trajectory_to_bev_ax
+
+
+def _convert_to_trajectory(traj_obj: Any) -> Trajectory:
+    """
+    Convert different trajectory types to navsim Trajectory format.
+    
+    :param traj_obj: Trajectory object (could be Trajectory, InterpolatedTrajectory, etc.)
+    :return: navsim Trajectory object
+    """
+    # If already a navsim Trajectory, return as-is
+    if isinstance(traj_obj, Trajectory):
+        return traj_obj
+    
+    # Handle InterpolatedTrajectory (nuPlan format)
+    if hasattr(traj_obj, '__iter__') and hasattr(traj_obj, '__len__'):
+        try:
+            # InterpolatedTrajectory is a list of EgoState objects
+            ego_states = list(traj_obj)
+            if len(ego_states) == 0:
+                # Empty trajectory, create minimal one
+                poses = np.zeros((1, 3), dtype=np.float32)
+            else:
+                # Extract poses from EgoState objects
+                poses = []
+                for ego_state in ego_states:
+                    if hasattr(ego_state, 'rear_axle'):
+                        # EgoState object
+                        pose = ego_state.rear_axle
+                        poses.append([pose.x, pose.y, pose.heading])
+                    elif hasattr(ego_state, 'center'):
+                        # Some other state object
+                        pose = ego_state.center
+                        poses.append([pose.x, pose.y, pose.heading])
+                
+                if len(poses) == 0:
+                    poses = np.zeros((1, 3), dtype=np.float32)
+                else:
+                    poses = np.array(poses, dtype=np.float32)
+            
+            # Create trajectory sampling
+            sampling = TrajectorySampling(
+                num_poses=len(poses),
+                interval_length=0.1  # Default interval
+            )
+            
+            return Trajectory(poses=poses, trajectory_sampling=sampling)
+            
+        except Exception as e:
+            # Fallback: create empty trajectory
+            poses = np.zeros((1, 3), dtype=np.float32)
+            sampling = TrajectorySampling(num_poses=1, interval_length=0.1)
+            return Trajectory(poses=poses, trajectory_sampling=sampling)
+    
+    # If object has poses attribute, try to use it directly
+    if hasattr(traj_obj, 'poses'):
+        return traj_obj
+    
+    # Final fallback: create minimal trajectory
+    poses = np.zeros((1, 3), dtype=np.float32)
+    sampling = TrajectorySampling(num_poses=1, interval_length=0.1)
+    return Trajectory(poses=poses, trajectory_sampling=sampling)
 
 
 def _get_text_position(position: str, ax: plt.Axes) -> Tuple[float, float]:
@@ -162,8 +224,16 @@ def add_trajectory_comparison_to_bev_ax(
             # Use default agent config for unknown trajectory types
             config = TRAJECTORY_CONFIG["agent"]
         
-        # Add trajectory to plot
-        add_trajectory_to_bev_ax(ax, trajectory, config)
+        # Convert trajectory to consistent format
+        try:
+            converted_trajectory = _convert_to_trajectory(trajectory)
+            # Add trajectory to plot
+            add_trajectory_to_bev_ax(ax, converted_trajectory, config)
+        except Exception as e:
+            # Skip this trajectory if conversion fails
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Failed to convert trajectory {traj_name}: {e}")
         
         # Create legend entry
         label = traj_name.replace('_', ' ').title()
