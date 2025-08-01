@@ -264,3 +264,50 @@ TRAJECTORY_CONFIG = {
 - `configure_bev_ax()`: BEV坐标系配置
 
 **优势**：充分利用现有架构，保持代码一致性，便于维护。
+
+## 🎨 多风格对比功能
+
+### 可视化内容说明
+
+当前可视化显示3条轨迹：
+
+1. **🔴 Predicted (红色)**：模型对当前场景的预测轨迹
+2. **🟢 Ground Truth (绿色)**：人类驾驶员的实际行驶轨迹  
+3. **🔵 PDM Reference (蓝色)**：PDM系统生成的参考轨迹（用于评分基准）
+
+**Style含义**：显示的是数据集中该场景的真实驾驶风格标注。
+
+### 多风格对比
+
+想要看同一个场景在不同风格下的预测结果？使用多风格对比功能：
+
+```bash
+# 对单个场景进行多风格对比
+./scripts/evaluation/run_multi_style_comparison.sh /path/to/checkpoint.ckpt scene_token_12345
+
+# 这会生成一个包含多个子图的对比可视化：
+# - 总览图：所有风格轨迹在一起对比
+# - 分图：每种风格的详细评测结果
+```
+
+**输出效果**：
+- 左侧：总览对比（所有风格轨迹叠加）
+- 右侧：各风格的独立详细分析（包含PDM评分）
+
+### 程序化多风格分析
+
+```python
+from navsim.visualization.multi_style_viz import run_multi_style_evaluation
+
+# 对同一场景运行多种风格
+results = run_multi_style_evaluation(
+    agent_input=agent_input,
+    scene=scene, 
+    agent=agent,
+    styles=["aggressive", "normal", "conservative"]
+)
+
+# 结果包含每种风格的轨迹和PDM评分
+for style, data in results["style_results"].items():
+    print(f"{style}: Score = {data['pdm_result'].score:.3f}")
+```
