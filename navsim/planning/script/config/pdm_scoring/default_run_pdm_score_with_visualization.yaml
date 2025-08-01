@@ -12,9 +12,9 @@ defaults:
   - default_evaluation
   - default_scoring_parameters
   - agent: diffusiondrive_style_agent
-  - worker: sequential
   - _self_
   - override train_test_split: navtest
+  - override worker: sequential
 
 metric_cache_path: ${oc.env:NAVSIM_EXP_ROOT}/metric_cache # path to metric cache
 
