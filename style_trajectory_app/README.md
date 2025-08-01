@@ -5,20 +5,20 @@
 ### 基础用法
 ```bash
 # 方式1: 通过模块运行 (推荐)
-python -m style_trajectory_app.cli --checkpoint /path/to/model.ckpt --dataset /path/to/dataset
+python -m style_trajectory_app.cli --checkpoint /path/to/model.ckpt --split navtest
 
 # 方式2: 直接运行脚本
-python style_trajectory_app/cli.py --checkpoint /path/to/model.ckpt --dataset /path/to/dataset
+python style_trajectory_app/cli.py --checkpoint /path/to/model.ckpt --split navmini
 
 # 方式3: 使用便捷脚本
-python run_style_demo.py --checkpoint /path/to/model.ckpt --dataset /path/to/dataset
+python run_style_demo.py --checkpoint /path/to/model.ckpt --split styletrain
 ```
 
 ### 完整参数示例
 ```bash
 python -m style_trajectory_app.cli \
   --checkpoint /path/to/diffusiondrive_style.ckpt \
-  --dataset /path/to/navsim_dataset \
+  --split navtest \
   --output ./results \
   --scenes 5 \
   --seed 42 \
@@ -30,9 +30,9 @@ python -m style_trajectory_app.cli \
 | 参数 | 短名 | 类型 | 必需 | 默认值 | 说明 |
 |------|------|------|------|--------|------|
 | `--checkpoint` | `-c` | str | ✅ | - | DiffusionDrive-Style模型检查点路径 |
-| `--dataset` | `-d` | str | ✅ | - | NavSim数据集路径 |
+| `--split` | `-s` | str | ❌ | `navtest` | 数据集split名称 (navtest/navmini/styletrain等) |
 | `--output` | `-o` | str | ❌ | `./style_trajectory_results` | 输出目录 |
-| `--scenes` | `-s` | int | ❌ | `1` | 要处理的场景数量 |
+| `--scenes` | - | int | ❌ | `1` | 要处理的场景数量 |
 | `--lr` | - | float | ❌ | `6e-4` | 学习率 |
 | `--seed` | - | int | ❌ | `42` | 随机种子 |
 | `--verbose` | `-v` | flag | ❌ | `False` | 详细输出模式 |
@@ -108,14 +108,14 @@ style_trajectory_results/
 
 ### 单个场景快速测试
 ```bash
-python -m style_trajectory_app.cli -c model.ckpt -d /data/navsim -o ./test_run
+python -m style_trajectory_app.cli -c model.ckpt -s navtest -o ./test_run
 ```
 
 ### 批量处理多个场景
 ```bash
 python -m style_trajectory_app.cli \
   -c /models/diffusiondrive_style.ckpt \
-  -d /datasets/navsim \
+  -s navmini \
   -o ./batch_results \
   --scenes 10 \
   --verbose
@@ -125,7 +125,7 @@ python -m style_trajectory_app.cli \
 ```bash
 python -m style_trajectory_app.cli \
   -c model.ckpt \
-  -d /data/navsim \
+  -s styletrain \
   -o ./experiment_1 \
   --scenes 20 \
   --seed 12345
@@ -140,11 +140,14 @@ python -m style_trajectory_app.cli \
    ```
    解决：检查模型路径是否正确
 
-2. **数据集路径错误**
+2. **环境变量未设置**
    ```
-   ❌ 数据集目录不存在: /path/to/dataset
+   ❌ 环境变量 OPENSCENE_DATA_ROOT 未设置
    ```
-   解决：确认数据集路径正确
+   解决：设置环境变量指向数据集根目录
+   ```bash
+   export OPENSCENE_DATA_ROOT=/path/to/your/data/root
+   ```
 
 3. **GPU内存不足**
    ```
@@ -156,6 +159,17 @@ python -m style_trajectory_app.cli \
 - 使用 `--verbose` 查看详细输出
 - 先用 `--scenes 1` 测试单个场景
 - 检查输出目录的权限设置
+- 确认环境变量设置正确
+
+### 环境变量设置
+```bash
+# 临时设置 (当前会话有效)
+export OPENSCENE_DATA_ROOT=/path/to/your/data/root
+
+# 永久设置 (添加到 ~/.bashrc 或 ~/.zshrc)
+echo 'export OPENSCENE_DATA_ROOT=/path/to/your/data/root' >> ~/.bashrc
+source ~/.bashrc
+```
 
 ## 🎯 性能优化
 
@@ -169,7 +183,7 @@ python -m style_trajectory_app.cli \
 # 大批量处理 (50+ 场景)
 python -m style_trajectory_app.cli \
   -c model.ckpt \
-  -d /data/navsim \
+  -s navtest \
   -o ./large_batch \
   --scenes 100 \
   --seed 42 \

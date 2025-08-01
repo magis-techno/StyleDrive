@@ -22,22 +22,28 @@ class StyleTrajectoryDataManager:
     Simplified data manager for style-aware trajectory prediction
     """
     
-    def __init__(self, dataset_path: str, inference_engine):
+    def __init__(self, navsim_log_path: str, sensor_blobs_path: str, split: str, inference_engine):
         """
         Initialize data manager
         
         Args:
-            dataset_path: Path to NavSim dataset
+            navsim_log_path: Path to NavSim logs
+            sensor_blobs_path: Path to sensor blobs
+            split: Dataset split name (e.g., navtest, navmini)
             inference_engine: StyleTrajectoryInferenceEngine instance
         """
-        self.dataset_path = Path(dataset_path)
+        self.navsim_log_path = Path(navsim_log_path)
+        self.sensor_blobs_path = Path(sensor_blobs_path)
+        self.split = split
         self.inference_engine = inference_engine
         
         # Initialize scene loader using agent's sensor config
         self.scene_loader = self._create_scene_loader()
         
         logger.info(f"Data manager initialized with {len(self.scene_loader.tokens)} scenes")
-        logger.info(f"Dataset path: {self.dataset_path}")
+        logger.info(f"NavSim logs path: {self.navsim_log_path}")
+        logger.info(f"Sensor blobs path: {self.sensor_blobs_path}")
+        logger.info(f"Dataset split: {self.split}")
         
     def _create_scene_loader(self):
         """
@@ -54,8 +60,8 @@ class StyleTrajectoryDataManager:
         
         # Create scene loader
         scene_loader = SceneLoader(
-            data_path=self.dataset_path,
-            sensor_blobs_path=self.dataset_path,  # Assume same path structure
+            data_path=self.navsim_log_path,
+            sensor_blobs_path=self.sensor_blobs_path,
             scene_filter=scene_filter,
             sensor_config=sensor_config
         )

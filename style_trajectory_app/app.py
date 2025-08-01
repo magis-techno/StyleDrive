@@ -27,7 +27,7 @@ class StyleTrajectoryApp:
     def __init__(
         self, 
         checkpoint_path: str, 
-        dataset_path: str,
+        split: str = "navtest",
         lr: float = 6e-4
     ):
         """
@@ -35,11 +35,24 @@ class StyleTrajectoryApp:
         
         Args:
             checkpoint_path: Path to DiffusionDrive-Style model checkpoint
-            dataset_path: Path to NavSim dataset
+            split: Dataset split name (e.g., navtest, navmini, styletrain)
             lr: Learning rate (used during agent initialization)
         """
+        import os
+        
+        # 检查环境变量
+        openscene_root = os.environ.get('OPENSCENE_DATA_ROOT')
+        if not openscene_root:
+            raise ValueError("环境变量 OPENSCENE_DATA_ROOT 未设置，请设置该变量指向数据集根目录")
+        
+        # 构建数据路径
+        navsim_log_path = f"{openscene_root}/navsim_logs/{split}"
+        sensor_blobs_path = f"{openscene_root}/sensor_blobs/{split}"
+        
         self.checkpoint_path = checkpoint_path
-        self.dataset_path = dataset_path
+        self.split = split
+        self.navsim_log_path = navsim_log_path
+        self.sensor_blobs_path = sensor_blobs_path
         self.lr = lr
         
         # Initialize logging
@@ -76,7 +89,9 @@ class StyleTrajectoryApp:
         # 2. Initialize data manager with inference engine
         logger.info("Initializing data manager...")
         self.data_manager = StyleTrajectoryDataManager(
-            dataset_path=self.dataset_path,
+            navsim_log_path=self.navsim_log_path,
+            sensor_blobs_path=self.sensor_blobs_path,
+            split=self.split,
             inference_engine=self.inference_engine
         )
         

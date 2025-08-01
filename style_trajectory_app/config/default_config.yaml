@@ -10,7 +10,8 @@ model:
 
 # Data configuration  
 data:
-  dataset_path: null  # Set this to your NavSim dataset path
+  split: "navtest"  # Dataset split name (navtest, navmini, styletrain, etc.)
+  # Note: Data paths are automatically constructed from OPENSCENE_DATA_ROOT environment variable
   
 # Visualization configuration
 visualization:

@@ -11,6 +11,7 @@ Usage:
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -30,9 +31,9 @@ def parse_arguments():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例用法:
-  python -m style_trajectory_app.cli --checkpoint model.ckpt --dataset /data/navsim
-  python -m style_trajectory_app.cli -c model.ckpt -d /data/navsim --output results/
-  python -m style_trajectory_app.cli -c model.ckpt -d /data/navsim --scenes 5
+  python -m style_trajectory_app.cli --checkpoint model.ckpt --split navtest  
+  python -m style_trajectory_app.cli -c model.ckpt -s navmini --output results/
+  python -m style_trajectory_app.cli -c model.ckpt -s styletrain --scenes 5
         """
     )
     
@@ -44,10 +45,10 @@ def parse_arguments():
     )
     
     parser.add_argument(
-        '--dataset', '-d',
+        '--split', '-s',
         type=str, 
-        required=True,
-        help='NavSim数据集路径'
+        default='navtest',
+        help='数据集split名称 (默认: navtest, 可选: navmini, styletrain等)'
     )
     
     parser.add_argument(
@@ -163,8 +164,15 @@ def run_style_demo_cli(args):
         print(f"❌ 检查点文件不存在: {args.checkpoint}")
         return 1
         
-    if not Path(args.dataset).exists():
-        print(f"❌ 数据集目录不存在: {args.dataset}")
+    # 检查环境变量
+    openscene_root = os.environ.get('OPENSCENE_DATA_ROOT')
+    if not openscene_root:
+        print(f"❌ 环境变量 OPENSCENE_DATA_ROOT 未设置")
+        print(f"请设置环境变量指向数据集根目录")
+        return 1
+    
+    if not Path(openscene_root).exists():
+        print(f"❌ 数据集根目录不存在: {openscene_root}")
         return 1
     
     # 设置输出目录
@@ -174,13 +182,14 @@ def run_style_demo_cli(args):
     # 初始化应用
     print(f"\n🔧 初始化应用...")
     print(f"  - 检查点: {args.checkpoint}")
-    print(f"  - 数据集: {args.dataset}")
+    print(f"  - 数据集split: {args.split}")
+    print(f"  - 数据集根目录: {openscene_root}")
     print(f"  - 学习率: {args.lr}")
     
     try:
         app = StyleTrajectoryApp(
             checkpoint_path=args.checkpoint,
-            dataset_path=args.dataset,
+            split=args.split,
             lr=args.lr
         )
         print("✅ 应用初始化成功!")
@@ -259,7 +268,7 @@ def run_style_demo_cli(args):
         'average_time_per_scene': total_time / len(all_results) if all_results else 0,
         'config': {
             'checkpoint': args.checkpoint,
-            'dataset': args.dataset,
+            'split': args.split,
             'lr': args.lr,
             'seed': args.seed
         },
