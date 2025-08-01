@@ -56,8 +56,8 @@ python navsim/planning/script/run_pdm_score.py \
     agent=diffusiondrive_style_agent \
     agent.checkpoint_path=/path/to/checkpoint.ckpt \
     experiment_name=eval_with_viz \
-    enable_visualization=true \
-    max_visualizations=20
+    +enable_visualization=true \
+    +max_visualizations=20
 ```
 
 ### 2. 配置选项
@@ -65,11 +65,11 @@ python navsim/planning/script/run_pdm_score.py \
 关键配置参数（通过命令行传递）：
 
 ```bash
-# 启用可视化
-enable_visualization=true
+# 启用可视化（注意+前缀，表示添加新配置）
++enable_visualization=true
 
 # 最大可视化数量（避免生成过多图片，推荐20-50）
-max_visualizations=20
++max_visualizations=20
 
 # 实验名称（影响输出目录）
 experiment_name=eval_with_viz

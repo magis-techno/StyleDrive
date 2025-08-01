@@ -19,7 +19,7 @@ python $NAVSIM_DEVKIT_ROOT/planning/script/run_pdm_score.py \
     agent=$AGENT_TYPE \
     agent.checkpoint_path=$CKPT \
     experiment_name=eval_${AGENT_TYPE}_with_viz \
-    enable_visualization=true \
-    max_visualizations=$MAX_VIZ
+    +enable_visualization=true \
+    +max_visualizations=$MAX_VIZ
 
 echo "Evaluation completed. Check output directory for visualizations."
