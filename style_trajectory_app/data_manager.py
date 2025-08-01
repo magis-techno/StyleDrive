@@ -199,7 +199,9 @@ class StyleTrajectoryDataManager:
             "num_map_locations": len(unique_maps),
             "log_names": unique_logs,
             "num_logs": len(unique_logs),
-            "dataset_path": str(self.dataset_path)
+            "navsim_log_path": str(self.navsim_log_path),
+            "sensor_blobs_path": str(self.sensor_blobs_path),
+            "split": self.split
         }
     
     def validate_scene(self, scene_token: str) -> bool:
