@@ -32,8 +32,8 @@ def parse_arguments():
         epilog="""
 示例用法:
   python -m style_trajectory_app.cli --checkpoint model.ckpt --split navtest  
-  python -m style_trajectory_app.cli -c model.ckpt -s navmini --output results/
-  python -m style_trajectory_app.cli -c model.ckpt -s styletrain --scenes 5
+  python -m style_trajectory_app.cli -c model.ckpt --split navmini --output results/
+  python -m style_trajectory_app.cli -c model.ckpt --split styletrain --scenes 5 --view-type bev
         """
     )
     
@@ -59,7 +59,7 @@ def parse_arguments():
     )
     
     parser.add_argument(
-        '--scenes', '-s',
+        '--scenes',
         type=int,
         default=1,
         help='要处理的场景数量 (默认: 1)'
@@ -77,6 +77,14 @@ def parse_arguments():
         type=int,
         default=42,
         help='随机种子 (默认: 42)'
+    )
+    
+    parser.add_argument(
+        '--view-type',
+        type=str,
+        choices=['simple', 'bev'],
+        default='simple',
+        help='可视化类型: simple (简单轨迹图) 或 bev (鸟瞰图) (默认: simple)'
     )
     
     parser.add_argument(
@@ -213,7 +221,7 @@ def run_style_demo_cli(args):
         
         try:
             # 运行演示
-            demo_result = app.run_style_demo()
+            demo_result = app.run_style_demo(view_type=args.view_type)
             scene_token = demo_result['scene_token']
             
             print(f"✅ 场景 {scene_token[:12]}... 处理完成")
@@ -269,6 +277,7 @@ def run_style_demo_cli(args):
         'config': {
             'checkpoint': args.checkpoint,
             'split': args.split,
+            'view_type': args.view_type,
             'lr': args.lr,
             'seed': args.seed
         },

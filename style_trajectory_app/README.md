@@ -4,23 +4,35 @@
 
 ### 基础用法
 ```bash
-# 方式1: 通过模块运行 (推荐)
+# 方式1: 通过模块运行 (推荐) - 简单视图
 python -m style_trajectory_app.cli --checkpoint /path/to/model.ckpt --split navtest
 
-# 方式2: 直接运行脚本
-python style_trajectory_app/cli.py --checkpoint /path/to/model.ckpt --split navmini
+# 方式2: 直接运行脚本 - BEV视图
+python style_trajectory_app/cli.py --checkpoint /path/to/model.ckpt --split navmini --view-type bev
 
-# 方式3: 使用便捷脚本
-python run_style_demo.py --checkpoint /path/to/model.ckpt --split styletrain
+# 方式3: 使用便捷脚本 - 高级可视化
+python run_style_demo.py --checkpoint /path/to/model.ckpt --split styletrain --view-type bev
 ```
 
 ### 完整参数示例
 ```bash
+# 简单轨迹可视化
 python -m style_trajectory_app.cli \
   --checkpoint /path/to/diffusiondrive_style.ckpt \
   --split navtest \
   --output ./results \
   --scenes 5 \
+  --view-type simple \
+  --seed 42 \
+  --verbose
+
+# BEV轨迹可视化（推荐）
+python -m style_trajectory_app.cli \
+  --checkpoint /path/to/diffusiondrive_style.ckpt \
+  --split navtest \
+  --output ./results \
+  --scenes 3 \
+  --view-type bev \
   --seed 42 \
   --verbose
 ```
@@ -30,12 +42,34 @@ python -m style_trajectory_app.cli \
 | 参数 | 短名 | 类型 | 必需 | 默认值 | 说明 |
 |------|------|------|------|--------|------|
 | `--checkpoint` | `-c` | str | ✅ | - | DiffusionDrive-Style模型检查点路径 |
-| `--split` | `-s` | str | ❌ | `navtest` | 数据集split名称 (navtest/navmini/styletrain等) |
+| `--split` | `-sp` | str | ❌ | `navtest` | 数据集split名称 (navtest/navmini/styletrain等) |
 | `--output` | `-o` | str | ❌ | `./style_trajectory_results` | 输出目录 |
 | `--scenes` | - | int | ❌ | `1` | 要处理的场景数量 |
+| `--view-type` | - | str | ❌ | `simple` | 可视化类型 (simple/bev) |
 | `--lr` | - | float | ❌ | `6e-4` | 学习率 |
 | `--seed` | - | int | ❌ | `42` | 随机种子 |
 | `--verbose` | `-v` | flag | ❌ | `False` | 详细输出模式 |
+
+## 🎨 可视化类型
+
+### Simple View (简单视图)
+- **特点**: 简洁的2D轨迹对比图
+- **优势**: 快速生成，资源占用少
+- **适用**: 快速验证和调试
+
+### BEV View (鸟瞰图视图) 🌟 推荐
+- **特点**: 包含地图背景和车辆标注的专业BEV视图
+- **优势**: 更直观理解轨迹与环境关系
+- **包含**: 道路结构、车辆位置、轨迹对比
+- **适用**: 正式分析和展示
+
+```bash
+# 使用BEV视图 (推荐)
+python -m style_trajectory_app.cli -c model.ckpt --split navtest --view-type bev
+
+# 使用简单视图 (快速测试)
+python -m style_trajectory_app.cli -c model.ckpt --split navtest --view-type simple
+```
 
 ## 📁 输出结构
 
@@ -108,26 +142,42 @@ style_trajectory_results/
 
 ### 单个场景快速测试
 ```bash
-python -m style_trajectory_app.cli -c model.ckpt -s navtest -o ./test_run
+# 简单视图测试
+python -m style_trajectory_app.cli -c model.ckpt --split navtest -o ./test_run
+
+# BEV视图测试  
+python -m style_trajectory_app.cli -c model.ckpt --split navtest -o ./test_run --view-type bev
 ```
 
 ### 批量处理多个场景
 ```bash
+# 简单轨迹批量处理
 python -m style_trajectory_app.cli \
   -c /models/diffusiondrive_style.ckpt \
-  -s navmini \
+  --split navmini \
   -o ./batch_results \
   --scenes 10 \
+  --verbose
+
+# BEV轨迹批量处理（推荐）
+python -m style_trajectory_app.cli \
+  -c /models/diffusiondrive_style.ckpt \
+  --split navmini \
+  -o ./batch_results \
+  --scenes 10 \
+  --view-type bev \
   --verbose
 ```
 
 ### 可重现实验
 ```bash
+# BEV视图大规模实验
 python -m style_trajectory_app.cli \
   -c model.ckpt \
-  -s styletrain \
+  --split styletrain \
   -o ./experiment_1 \
   --scenes 20 \
+  --view-type bev \
   --seed 12345
 ```
 
@@ -180,12 +230,13 @@ source ~/.bashrc
 
 ### 批量处理建议
 ```bash
-# 大批量处理 (50+ 场景)
+# 大批量处理 (50+ 场景) - BEV视图
 python -m style_trajectory_app.cli \
   -c model.ckpt \
-  -s navtest \
+  --split navtest \
   -o ./large_batch \
   --scenes 100 \
+  --view-type bev \
   --seed 42 \
   > large_batch.log 2>&1 &
 ```

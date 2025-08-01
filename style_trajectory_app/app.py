@@ -180,6 +180,7 @@ class StyleTrajectoryApp:
         self, 
         trajectories: Dict[str, Any], 
         scene_data=None,
+        view_type: str = "simple",
         title: str = "Driving Style Trajectory Comparison",
         save_path: Optional[str] = None
     ):
@@ -189,32 +190,43 @@ class StyleTrajectoryApp:
         Args:
             trajectories: Dictionary mapping style names to trajectory tensors
             scene_data: Optional scene data for background
+            view_type: Visualization type ("simple" or "bev")
             title: Plot title
             save_path: Optional path to save the plot
             
         Returns:
             matplotlib Figure object
         """
-        logger.info("Creating style comparison visualization...")
+        logger.info(f"Creating style comparison visualization ({view_type})...")
         
-        fig = plot_style_trajectories(
-            trajectories=trajectories,
-            scene_data=scene_data,
-            title=title,
-            save_path=save_path
-        )
+        if view_type == "bev":
+            from .style_visualization import plot_style_trajectories_bev
+            fig = plot_style_trajectories_bev(
+                trajectories=trajectories,
+                scene=scene_data,
+                title=title
+            )
+        else:
+            from .style_visualization import plot_style_trajectories
+            fig = plot_style_trajectories(
+                trajectories=trajectories,
+                scene_data=scene_data,
+                title=title,
+                save_path=save_path
+            )
         
         if save_path:
             logger.info(f"Visualization saved to: {save_path}")
         
         return fig
     
-    def run_style_demo(self, scene_token: Optional[str] = None) -> Dict[str, Any]:
+    def run_style_demo(self, scene_token: Optional[str] = None, view_type: str = "simple") -> Dict[str, Any]:
         """
         Run complete style demonstration: random scene + all styles + visualization
         
         Args:
             scene_token: Optional specific scene token. If None, random scene is selected
+            view_type: Visualization type ("simple" or "bev")
             
         Returns:
             Dictionary containing complete demo results
@@ -237,7 +249,8 @@ class StyleTrajectoryApp:
         fig = self.visualize_style_comparison(
             trajectories=all_styles_result["trajectories"],
             scene_data=scene,
-            title=f"Style Comparison - Scene {scene_token[:8]}..."
+            view_type=view_type,
+            title=f"Style Comparison ({view_type.upper()}) - Scene {scene_token[:8]}..."
         )
         
         demo_time = time.time() - demo_start_time

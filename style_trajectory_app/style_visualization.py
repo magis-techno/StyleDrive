@@ -7,13 +7,14 @@ from different driving styles in BEV (Bird's Eye View) format.
 
 import matplotlib.pyplot as plt
 import numpy as np
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Any, Tuple
 import torch
 
 # Try to import navsim visualization modules
 try:
-    from navsim.visualization.bev import plot_bev_map
-    from navsim.visualization.plots import plot_trajectory
+    from navsim.visualization.plots import configure_bev_ax
+    from navsim.visualization.bev import add_annotations_to_bev_ax, add_map_to_bev_ax
+    from navsim.common.dataclasses import Scene
     NAVSIM_VIZ_AVAILABLE = True
 except ImportError:
     NAVSIM_VIZ_AVAILABLE = False
@@ -264,6 +265,166 @@ def create_style_comparison_grid(trajectories: Dict[str, torch.Tensor], scene_da
     ax.set_ylabel('Y (meters)')
     ax.grid(True, alpha=0.3)
     ax.legend()
+    ax.set_aspect('equal')
+    
+    plt.tight_layout()
+    return fig
+
+
+def plot_style_trajectories_bev(
+    trajectories: Dict[str, torch.Tensor],
+    scene: Any,  # Scene object from NavSim
+    frame_idx: Optional[int] = None,
+    title: str = "DiffusionDrive-Style: BEV轨迹对比",
+    figsize: Tuple[int, int] = (12, 8)
+) -> plt.Figure:
+    """
+    在BEV视角下可视化三种驾驶风格的轨迹对比
+    
+    Args:
+        trajectories: 三种风格的轨迹预测结果 
+        scene: NavSim场景对象 (包含地图、标注等信息)
+        frame_idx: 当前帧索引，如果为None则使用最后一个历史帧
+        title: 图标题
+        figsize: 图像尺寸
+        
+    Returns:
+        matplotlib Figure对象
+    """
+    if not NAVSIM_VIZ_AVAILABLE:
+        print("Warning: NavSim visualization not available, falling back to simple plotting")
+        return plot_style_trajectories_simple_fallback(trajectories, title, figsize)
+    
+    # 设置当前帧索引
+    if frame_idx is None:
+        frame_idx = scene.scene_metadata.num_history_frames - 1  # 当前帧
+    
+    # 创建图形
+    fig, ax = plt.subplots(1, 1, figsize=figsize)
+    ax.set_title(title, fontsize=16, fontweight='bold', pad=20)
+    
+    # 添加地图背景
+    try:
+        add_map_to_bev_ax(ax, scene.frames[frame_idx].map)
+    except Exception as e:
+        print(f"Warning: Could not add map to BEV: {e}")
+    
+    # 添加车辆标注
+    try:
+        add_annotations_to_bev_ax(ax, scene.frames[frame_idx].annotations)
+    except Exception as e:
+        print(f"Warning: Could not add annotations to BEV: {e}")
+    
+    # 风格颜色配置
+    style_colors = {
+        'aggressive': '#FF4444',    # 红色
+        'normal': '#4444FF',        # 蓝色  
+        'conservative': '#44AA44'   # 绿色
+    }
+    
+    # 添加风格轨迹
+    for style_name, trajectory in trajectories.items():
+        if trajectory is None:
+            continue
+            
+        # 转换轨迹到numpy格式
+        if isinstance(trajectory, torch.Tensor):
+            traj_np = trajectory.detach().cpu().numpy()
+        else:
+            traj_np = np.array(trajectory)
+            
+        # 处理batch维度
+        if len(traj_np.shape) == 3:
+            traj_np = traj_np[0]  # 移除batch维度
+            
+        # 提取x, y坐标
+        x_coords = traj_np[:, 0]
+        y_coords = traj_np[:, 1]
+        color = style_colors.get(style_name, '#888888')
+        
+        # 绘制轨迹线
+        ax.plot(x_coords, y_coords, color=color, linewidth=4, alpha=0.9, 
+               label=f'{style_name.capitalize()}', zorder=10)
+        
+        # 添加起点和终点标记
+        ax.scatter(x_coords[0], y_coords[0], color=color, s=120, marker='o', 
+                  edgecolor='white', linewidth=2, zorder=11)
+        ax.scatter(x_coords[-1], y_coords[-1], color=color, s=120, marker='*', 
+                  edgecolor='white', linewidth=2, zorder=11)
+    
+    # 配置BEV视图
+    configure_bev_ax(ax)
+    
+    # 添加图例
+    ax.legend(loc='upper right', frameon=True, fancybox=True, shadow=True, 
+             fontsize=12, bbox_to_anchor=(0.98, 0.98))
+    
+    # 添加说明文本
+    style_info = "○ 起点  ★ 终点"
+    ax.text(0.02, 0.02, style_info, transform=ax.transAxes, fontsize=10,
+           bbox=dict(boxstyle="round,pad=0.3", facecolor='white', alpha=0.8))
+    
+    plt.tight_layout()
+    return fig
+
+
+def plot_style_trajectories_simple_fallback(
+    trajectories: Dict[str, torch.Tensor],
+    title: str = "Driving Style Trajectory Comparison (Fallback)",
+    figsize: Tuple[int, int] = (12, 8)
+) -> plt.Figure:
+    """
+    简化版轨迹可视化，作为BEV可视化的备选方案
+    
+    Args:
+        trajectories: 三种风格的轨迹预测结果
+        title: 图标题
+        figsize: 图像尺寸
+        
+    Returns:
+        matplotlib Figure对象
+    """
+    fig, ax = plt.subplots(1, 1, figsize=figsize)
+    ax.set_title(title, fontsize=16, fontweight='bold')
+    
+    # 风格颜色配置
+    style_colors = {
+        'aggressive': '#FF4444',    # 红色
+        'normal': '#4444FF',        # 蓝色
+        'conservative': '#44AA44'   # 绿色
+    }
+    
+    # 绘制轨迹
+    for style_name, trajectory in trajectories.items():
+        if trajectory is None:
+            continue
+            
+        # 转换轨迹到numpy格式
+        if isinstance(trajectory, torch.Tensor):
+            traj_np = trajectory.detach().cpu().numpy()
+        else:
+            traj_np = np.array(trajectory)
+            
+        # 处理batch维度
+        if len(traj_np.shape) == 3:
+            traj_np = traj_np[0]
+            
+        x_coords = traj_np[:, 0]
+        y_coords = traj_np[:, 1]
+        color = style_colors.get(style_name, '#888888')
+        
+        # 绘制轨迹
+        ax.plot(x_coords, y_coords, color=color, linewidth=3, alpha=0.8, 
+               label=f'{style_name.capitalize()}')
+        ax.scatter(x_coords[0], y_coords[0], color=color, s=80, marker='o', 
+                  edgecolor='black', linewidth=1)
+        ax.scatter(x_coords[-1], y_coords[-1], color=color, s=80, marker='*', 
+                  edgecolor='black', linewidth=1)
+    
+    ax.set_xlabel('X (meters)', fontsize=12)
+    ax.set_ylabel('Y (meters)', fontsize=12)
+    ax.grid(True, alpha=0.3)
+    ax.legend(fontsize=11)
     ax.set_aspect('equal')
     
     plt.tight_layout()

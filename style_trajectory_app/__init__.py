@@ -18,6 +18,7 @@ from .data_manager import StyleTrajectoryDataManager
 # Import visualization functions (keep backward compatibility)
 from .style_visualization import (
     plot_style_trajectories,
+    plot_style_trajectories_bev,
     plot_trajectory_metrics,
     create_style_comparison_grid
 )
@@ -38,6 +39,7 @@ __all__ = [
     
     # Visualization functions
     "plot_style_trajectories",
+    "plot_style_trajectories_bev",
     "plot_trajectory_metrics", 
     "create_style_comparison_grid",
     
