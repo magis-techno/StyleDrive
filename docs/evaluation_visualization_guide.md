@@ -47,37 +47,35 @@ docs/evaluation_visualization_guide.md        # 本文档
 运行带有可视化的PDM评测：
 
 ```bash
-# 使用脚本运行（推荐）
-./scripts/evaluation/run_pdm_score_with_visualization.sh /path/to/checkpoint.ckpt diffusiondrive_style_agent
+# 使用便捷脚本（推荐）
+./scripts/evaluation/run_pdm_score_with_viz.sh /path/to/checkpoint.ckpt diffusiondrive_style_agent 20
 
-# 或者直接使用Python命令
-python navsim/planning/script/run_pdm_score_with_visualization.py \
-    --config-path="config/pdm_scoring" \
-    --config-name="default_run_pdm_score_with_visualization" \
+# 或者直接使用现有的PDM评测脚本
+python navsim/planning/script/run_pdm_score.py \
     train_test_split=styletest \
     agent=diffusiondrive_style_agent \
     agent.checkpoint_path=/path/to/checkpoint.ckpt \
+    experiment_name=eval_with_viz \
     enable_visualization=true \
     max_visualizations=20
 ```
 
 ### 2. 配置选项
 
-关键配置参数：
+关键配置参数（通过命令行传递）：
 
-```yaml
+```bash
 # 启用可视化
-enable_visualization: true
+enable_visualization=true
 
-# 可视化输出目录
-visualization_output_dir: "pdm_evaluation_visualizations"
+# 最大可视化数量（避免生成过多图片，推荐20-50）
+max_visualizations=20
 
-# 最大可视化数量（避免生成过多图片）
-max_visualizations: 50
-
-# 使用单线程执行（确保可视化兼容性）
-worker: sequential
+# 实验名称（影响输出目录）
+experiment_name=eval_with_viz
 ```
+
+**注意**：可视化功能自动与任何worker配置兼容，无需特殊设置。
 
 ### 3. 输出结果
 
@@ -85,12 +83,13 @@ worker: sequential
 
 ```
 output_dir/
-├── pdm_evaluation_visualizations/
+├── visualizations/
 │   ├── abcd1234efgh_evaluation.png           # BEV可视化图片
 │   ├── abcd1234efgh_evaluation_data.json     # 详细评测数据
-│   ├── abcd1234efgh_trajectories.pkl         # 轨迹数据
-│   └── visualization_summary.csv             # 可视化场景汇总
-└── eval_with_visualization_pdm_score.csv     # 完整评测结果
+│   └── abcd1234efgh_trajectories.pkl         # 轨迹数据
+├── traj_and_metric/                          # 原有轨迹保存
+│   └── abcd1234efgh.pkl
+└── {timestamp}.csv                           # 完整评测结果（含可视化路径）
 ```
 
 ### 4. 程序化使用
@@ -241,12 +240,21 @@ TRAJECTORY_CONFIG = {
 
 ## 技术细节
 
+### 集成架构
+
+本可视化功能采用**最小侵入式设计**，直接集成到现有的 `run_pdm_score.py` 中：
+
+- ✅ **零配置冲突**：完全兼容现有配置系统
+- ✅ **可选加载**：可视化模块缺失时自动降级
+- ✅ **内存管理**：自动释放matplotlib资源
+- ✅ **错误隔离**：可视化失败不影响评测
+
 ### 核心函数
 
-- `add_pdm_results_to_bev_ax()`: 添加PDM结果文本框
-- `add_trajectory_comparison_to_bev_ax()`: 添加多轨迹对比
 - `create_evaluation_visualization()`: 创建完整评测可视化
 - `save_evaluation_results()`: 保存可视化结果和数据
+- `add_pdm_results_to_bev_ax()`: 添加PDM结果文本框
+- `add_trajectory_comparison_to_bev_ax()`: 添加多轨迹对比
 
 ### 复用的现有组件
 
@@ -255,4 +263,4 @@ TRAJECTORY_CONFIG = {
 - `add_trajectory_to_bev_ax()`: 轨迹绘制
 - `configure_bev_ax()`: BEV坐标系配置
 
-充分利用了现有的navsim可视化架构，保持了代码的一致性和可维护性。
+**优势**：充分利用现有架构，保持代码一致性，便于维护。

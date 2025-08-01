@@ -27,6 +27,14 @@ from navsim.planning.simulation.planner.pdm_planner.simulation.pdm_simulator imp
 from navsim.planning.simulation.planner.pdm_planner.scoring.pdm_scorer import PDMScorer
 from navsim.planning.metric_caching.metric_cache import MetricCache
 
+# Visualization imports (optional)
+try:
+    from navsim.visualization.evaluation_viz import create_evaluation_visualization, save_evaluation_results
+    VISUALIZATION_AVAILABLE = True
+except ImportError:
+    logger.warning("Visualization modules not available. Evaluation will run without visualization.")
+    VISUALIZATION_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 CONFIG_PATH = "config/pdm_scoring"
@@ -115,6 +123,65 @@ def run_pdm_score(args: List[Dict[str, Union[List[str], DictConfig]]]) -> List[D
             )
 
             score_row.update(asdict(pdm_result))
+            
+            # Add visualization if enabled
+            if (VISUALIZATION_AVAILABLE and 
+                cfg.get("enable_visualization", False) and 
+                idx < cfg.get("max_visualizations", 20)):
+                try:
+                    # Create visualization
+                    trajectories = {
+                        "predicted": trajectory,
+                        "ground_truth": gt_trajectory,
+                        "pdm_reference": metric_cache.trajectory
+                    }
+                    
+                    pdm_results_dict = {
+                        "predicted": pdm_result
+                    }
+                    
+                    current_frame = scene.frames[0]  # Use first frame as reference
+                    
+                    # Try to get map API
+                    map_api = None
+                    try:
+                        map_api = scene.map_api
+                    except:
+                        pass  # Continue without map
+                    
+                    fig = create_evaluation_visualization(
+                        frame=current_frame,
+                        trajectories=trajectories,
+                        pdm_results=pdm_results_dict,
+                        map_api=map_api,
+                        scene_token=token,
+                        style=style
+                    )
+                    
+                    # Save visualization
+                    viz_output_dir = os.path.join(cfg.output_dir, "visualizations")
+                    os.makedirs(viz_output_dir, exist_ok=True)
+                    
+                    evaluation_results = {
+                        "figure": fig,
+                        "trajectories": trajectories,
+                        "pdm_results": pdm_results_dict,
+                        "style": style
+                    }
+                    
+                    viz_path = save_evaluation_results(evaluation_results, viz_output_dir, token)
+                    score_row["visualization_path"] = viz_path
+                    
+                    # Close figure to free memory
+                    import matplotlib.pyplot as plt
+                    plt.close(fig)
+                    
+                    logger.info(f"Generated visualization for scene {token[:8]}")
+                    
+                except Exception as viz_error:
+                    logger.warning(f"Failed to generate visualization for {token}: {viz_error}")
+                    # Continue processing even if visualization fails
+            
         except Exception as e:
             logger.warning(f"----------- Agent failed for token {token}:")
             traceback.print_exc()
