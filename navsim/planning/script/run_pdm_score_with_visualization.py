@@ -20,7 +20,7 @@ from nuplan.planning.utils.multithreading.worker_ray import RayDistributed
 from navsim.common.dataclasses import PDMResults, Trajectory
 from navsim.evaluate.pdm_score import pdm_score
 from navsim.planning.metric_caching.metric_cache import MetricCache
-from navsim.planning.metric_caching.metric_cache_processor import MetricCacheLoader
+from navsim.common.dataloader import MetricCacheLoader
 from navsim.planning.scenario_builder.navsim_scenario import NavSimScenario
 from navsim.planning.script.builders.observation_builder import build_observation_wrapper
 from navsim.planning.script.builders.planner_builder import build_planner
