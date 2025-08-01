@@ -12,6 +12,7 @@ defaults:
   - default_evaluation
   - default_scoring_parameters
   - agent: diffusiondrive_style_agent
+  - worker: sequential
   - _self_
   - override train_test_split: navtest
 
@@ -28,4 +29,3 @@ max_visualizations: 50
 experiment_name: "eval_with_visualization"
 
 # Force single-threaded execution for visualization compatibility
-worker: sequential
