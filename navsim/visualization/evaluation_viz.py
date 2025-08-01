@@ -224,16 +224,8 @@ def add_trajectory_comparison_to_bev_ax(
             # Use default agent config for unknown trajectory types
             config = TRAJECTORY_CONFIG["agent"]
         
-        # Convert trajectory to consistent format
-        try:
-            converted_trajectory = _convert_to_trajectory(trajectory)
-            # Add trajectory to plot
-            add_trajectory_to_bev_ax(ax, converted_trajectory, config)
-        except Exception as e:
-            # Skip this trajectory if conversion fails
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.warning(f"Failed to convert trajectory {traj_name}: {e}")
+        # Add trajectory to plot (already converted)
+        add_trajectory_to_bev_ax(ax, trajectory, config)
         
         # Create legend entry
         label = traj_name.replace('_', ' ').title()
@@ -301,6 +293,17 @@ def create_evaluation_visualization(
     from navsim.visualization.bev import add_configured_bev_on_ax
     from navsim.visualization.plots import configure_bev_ax
     
+    # Convert all trajectories to consistent format at the beginning
+    converted_trajectories = {}
+    for traj_name, trajectory in trajectories.items():
+        try:
+            converted_trajectories[traj_name] = _convert_to_trajectory(trajectory)
+        except Exception as e:
+            # Log warning and skip this trajectory
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Failed to convert trajectory {traj_name}: {e}")
+    
     # Create figure and axis
     fig_size = BEV_PLOT_CONFIG["figure_size"]
     fig, ax = plt.subplots(1, 1, figsize=fig_size)
@@ -322,7 +325,7 @@ def create_evaluation_visualization(
     if scene_token:
         title = f"Scene: {scene_token[:8]}... | Style: {style}"
     
-    ax = add_trajectory_comparison_to_bev_ax(ax, trajectories, pdm_results, title)
+    ax = add_trajectory_comparison_to_bev_ax(ax, converted_trajectories, pdm_results, title)
     
     # Add PDM results for the predicted trajectory
     if "predicted" in pdm_results:
