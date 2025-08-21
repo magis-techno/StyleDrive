@@ -1,5 +1,5 @@
 TRAIN_TEST_SPLIT=styletest
-CKPT=YOUR_CKPT_PATH
+CKPT=$NAVSIM_DEVKIT_ROOT/../checkpoints/
 
 python $NAVSIM_DEVKIT_ROOT/planning/script/run_pdm_score.py \
         train_test_split=$TRAIN_TEST_SPLIT \
